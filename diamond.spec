@@ -10,7 +10,7 @@ Summary(pl.UTF-8):	Demon napisany w Pythonie, zbierajÄ…cy statystyki i publikujÄ
 # Name must match the python module/package name (as in 'import' statement)
 Name:		diamond
 Version:	4.0.195
-Release:	0.5
+Release:	0.6
 License:	MIT
 Group:		Libraries/Python
 # https://github.com/python-diamond/Diamond/archive/v4.0.tar.gz
@@ -118,11 +118,24 @@ rm -rf $RPM_BUILD_ROOT
 %groupadd -g 327 diamond
 %useradd -u 327 -d /var/log/diamond -g diamond -c "Diamond daemon user" diamond
 
+%post
+/sbin/chkconfig --add diamond
+## %systemd_post diamond.service 
+
+%preun
+if [ "$1" = "0" ]; then
+	%service diamond stop
+	/sbin/chkconfig --del diamond
+fi
+%systemd_preun diamond.service
+
 %postun
 if [ "$1" = "0" ]; then
 	%userremove diamond
 	%groupremove diamond
 fi
+%systemd_reload
+
 
 %if %{with python2}
 %files
@@ -139,7 +152,6 @@ fi
 %{_datadir}/diamond/
 %attr(750,diamond,diamond) /var/log/diamond
 %attr(754,root,root) /etc/rc.d/init.d/diamond
-
 
 %if "%{py_ver}" > "2.4"
 %{py_sitescriptdir}/%{module}-%{version}-py*.egg-info
