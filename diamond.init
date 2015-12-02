@@ -1,0 +1,115 @@
+#!/bin/sh
+#
+# diamond	Start the diamond statistics collector
+#
+# chkconfig:	345 85 15
+# description: Diamond is a daemon and toolset for gathering system statistics \
+#              and publishing them to Graphite.
+# processname: python
+# config: /etc/diamond/diamond.conf
+# pidfile: /var/run/diamond.pid
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+# Get network config
+. /etc/sysconfig/network
+
+# Get service config
+[ -f /etc/sysconfig/diamond ] && . /etc/sysconfig/diamond
+
+
+SVC_NAME="Diamond stats gathering daemon"
+
+
+
+start() {
+	# Check if the service is already running?
+	if [ -f /var/lock/subsys/diamond ]; then
+		msg_already_running "$SVC_NAME"
+		return
+	fi
+
+	## [ "$1" -eq 0 ] || checkconfig
+	msg_starting "$SVC_NAME"
+	# diamond switches to diamond:diamond on his own, let's not use --user diamond here
+	daemon    /usr/bin/diamond --pidfile /var/run/diamond.pid
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/diamond
+}
+
+stop() {
+	# Stop daemon.
+	if [ ! -f /var/lock/subsys/diamond ]; then
+		msg_not_running "$SVC_NAME"
+		return
+	fi
+
+	msg_stopping "$SVC_NAME"
+	killproc --pidfile /var/run/diamond.pid # httpd
+	rm -f /var/lock/subsys/diamond /var/run/diamond.pid  >/dev/null 2>&1
+}
+
+
+reload() {
+	if [ ! -f /var/lock/subsys/diamond ]; then
+		msg_not_running "$SVC_NAME"
+		RETVAL=7
+		return
+	fi
+
+	## checkconfig
+	## msg_reloading "$SVC_NAME"
+	## busy
+	## /usr/sbin/httpd $CFG $HTTPD_OPTS -k graceful
+	## RETVAL=$?
+	## [ $RETVAL -eq 0 ] && ok || fail
+}
+
+condrestart() {
+	if [ ! -f /var/lock/subsys/diamond ]; then
+		msg_not_running "$SVC_NAME"
+		RETVAL=$1
+		return
+	fi
+
+	## checkconfig
+	stop
+	start
+}
+
+RETVAL=0
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart)
+	## checkconfig
+	stop
+	start 0
+	;;
+  try-restart)
+	condrestart 0
+	;;
+  ## reload|force-reload|graceful|flush-logs)
+	## reload
+	## ;;
+  ## checkconfig|configtest)
+	## checkconfig 1
+	## ;;
+  status)
+	status diamond
+	RETVAL=$?
+	;;
+  *)
+	## msg_usage "$0 {start|stop|restart|try-restart|reload|force-reload|graceful|configtest|status}"
+	msg_usage "$0 {start|stop|restart|try-restart}"
+	exit 3
+	;;
+esac
+
+exit $RETVAL
