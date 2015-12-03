@@ -4,7 +4,6 @@
 # Conditional build:
 %bcond_with	tests	# do not perform "make test"
 
-%define 	module	diamond
 Summary:	Python daemon that collects system metrics and publishes them to Graphite (and others)
 Summary(pl.UTF-8):	Demon napisany w Pythonie, zbierający statystyki i publikujący je do Graphite (i innych)
 Name:		diamond
@@ -36,36 +35,36 @@ memory, network, i/o, load and disk metrics. Additionally, it features
 an API for implementing custom collectors for gathering metrics from
 almost any source.
 
-%package -n %{module}-collector-postgresql
+%package -n %{name}-collector-postgresql
 Summary:	Data collector for PostgreSQL database
 Summary(pl.UTF-8):	Zbieracz statystyk dla bazdy danych Postgresql
 Group:		Libraries/Python
 Requires:	%{name} = %{version}-%{release}
 Requires:	python-psycopg2
 
-%description -n %{module}-collector-postgresql
+%description -n %{name}-collector-postgresql
 Data collector for PostgreSQL database
 
-%description -n %{module}-collector-postgresql -l pl.UTF-8
+%description -n %{name}-collector-postgresql -l pl.UTF-8
 Zbieracz statystyk dla bazdy danych Postgresql
 
 %prep
-%setup -q -n %{module}-%{version}
+%setup -q
 
 %build
 %py_build %{?with_tests:test}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT%{_sysconfdir}/%{module}/{collectors,handlers} \
-	$RPM_BUILD_ROOT{/etc/rc.d/init.d,%{_localstatedir}/log/%{module}}
+install -d $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/{collectors,handlers} \
+	$RPM_BUILD_ROOT{/etc/rc.d/init.d,%{_localstatedir}/log/%{name}}
 
 %py_install
 %py_postclean
 
-cp -p %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/%{module}/diamond.conf
+cp -p %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/diamond.conf
 install -p %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/diamond
-cp -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/%{module}/collectors
+cp -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/collectors
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -92,18 +91,18 @@ fi
 %files
 %defattr(644,root,root,755)
 %doc README.md LICENSE
-%dir %attr(750,root,diamond) %{_sysconfdir}/%{module}
-%dir %attr(750,root,diamond) %{_sysconfdir}/%{module}/collectors
-%dir %attr(750,root,diamond) %{_sysconfdir}/%{module}/handlers
-%attr(640,root,diamond) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/%{module}/diamond.conf
+%dir %attr(750,root,diamond) %{_sysconfdir}/%{name}
+%dir %attr(750,root,diamond) %{_sysconfdir}/%{name}/collectors
+%dir %attr(750,root,diamond) %{_sysconfdir}/%{name}/handlers
+%attr(640,root,diamond) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/%{name}/diamond.conf
 %attr(755,root,root) %{_bindir}/diamond
 %attr(755,root,root) %{_bindir}/diamond-setup
-%{py_sitescriptdir}/%{module}
+%{py_sitescriptdir}/%{name}
 %{_datadir}/diamond
 %attr(750,diamond,diamond) /var/log/diamond
 %attr(754,root,root) /etc/rc.d/init.d/diamond
-%{py_sitescriptdir}/%{module}-%{version}-py*.egg-info
+%{py_sitescriptdir}/%{name}-%{version}-py*.egg-info
 
-%files -n %{module}-collector-postgresql
+%files -n %{name}-collector-postgresql
 %defattr(644,root,root,755)
-%{_sysconfdir}/%{module}/collectors/PostgresqlCollector.conf
+%{_sysconfdir}/%{name}/collectors/PostgresqlCollector.conf
