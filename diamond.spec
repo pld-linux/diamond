@@ -1,5 +1,5 @@
 # TODO
-# - missing %post %service restart
+# - missing %%post %%service restart
 #
 # Conditional build:
 %bcond_with	tests	# do not perform "make test"
@@ -8,7 +8,7 @@ Summary:	Python daemon that collects system metrics and publishes them to Graphi
 Summary(pl.UTF-8):	Demon napisany w Pythonie, zbierający statystyki i publikujący je do Graphite (i innych)
 Name:		diamond
 Version:	4.0.195
-Release:	1
+Release:	2
 License:	MIT
 Group:		Libraries/Python
 Source0:	https://pypi.python.org/packages/source/d/diamond/%{name}-%{version}.tar.gz
